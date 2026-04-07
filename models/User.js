@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
+    team: { type: String },
     name: { type: String, required: true },
     email: {
       type: String,
@@ -12,6 +13,8 @@ const userSchema = new mongoose.Schema(
     },
     password: { type: String },
     googleId: { type: String },
+    skills: [String],
+    bio: { type: String },
   },
   {
     timestamps: true,

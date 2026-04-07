@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import authroutes from "./routes/auth.js";
-import libroutes from "./routes/library.js";
 import { env } from "./config/env.js";
 import connectDB from "./config/mongo.js";
 
@@ -22,7 +21,6 @@ app.use(
 app.use(express.json());
 
 app.use("/auth", authroutes);
-app.use("/library", libroutes);
 
 const startServer = async () => {
   await connectDB();

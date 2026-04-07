@@ -110,26 +110,27 @@ export const googleLogin = async (req, res) => {
   }
 };
 
-export const getUser = async (req, res) => {
+export const updateUser = async (req, res) => {
   try {
-    const user = await User.findById(req.userId)
-      .select("name email googleId")
-      .lean();
+    const { skills, bio, team } = req.body;
+
+    const updateData = {};
+    if (skills !== undefined) updateData.skills = skills;
+    if (bio !== undefined) updateData.bio = bio;
+    if (team !== undefined) updateData.team = team;
+
+    const user = await User.findByIdAndUpdate(req.userId, updateData, {
+      new: true,
+      runValidators: true,
+    }).select("name email skills bio team");
 
     if (!user) {
-      return res.json({ error: "user not found" });
+      return res.json({ error: "User not found" });
     }
 
-    res.json({
-      user: {
-        id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-        googleId: user.googleId,
-      },
-    });
+    res.json({ user });
   } catch (err) {
-    console.error("Get User Error:", err);
-    res.json({ error: "Server error" });
+    console.error("Update User Error:", err);
+    res.status(500).json({ error: "Server error" });
   }
 };
