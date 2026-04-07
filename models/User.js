@@ -1,7 +1,8 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
+    name: { type: String, required: true },
     email: {
       type: String,
       required: true,
@@ -9,9 +10,17 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    password: { type: String, required: true },
+    password: { type: String },
+    googleId: { type: String },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
-module.exports = mongoose.model("User", userSchema);
+userSchema.index({ email: 1 }, { unique: true });
+
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+export default User;

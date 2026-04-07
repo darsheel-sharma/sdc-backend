@@ -1,38 +1,35 @@
-﻿require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const userRoutes = require("./routes/userRoutes");
+import express from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import authroutes from "./routes/auth.js";
+import libroutes from "./routes/library.js";
+import { env } from "./config/env.js";
+import connectDB from "./config/mongo.js";
 
 const app = express();
+
+app.use(
+  cors({
+    origin: ["http://localhost:5000", "http://127.0.0.1:5000"],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
-const { MONGO_URI, JWT_SECRET, PORT = 3000 } = process.env;
-if (!MONGO_URI || !JWT_SECRET) {
-  console.error("Missing MONGO_URI or JWT_SECRET in environment");
-  process.exit(1);
-}
+app.use("/auth", authroutes);
+app.use("/library", libroutes);
 
-mongoose
-  .connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => {
-    console.error("MongoDB connection error:", err);
-    process.exit(1);
+const startServer = async () => {
+  await connectDB();
+
+  app.listen(env.PORT, () => {
+    console.log(`Listening on ${env.PORT}`);
   });
+};
 
-app.get("/", (req, res) => {
-  res.json({ status: "ok" });
+process.on("SIGINT", async () => {
+  await mongoose.disconnect();
+  process.exit(0);
 });
 
-app.use("/api/users", userRoutes);
-
-app.use((req, res) => {
-  res.status(404).json({ error: "Not found" });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+startServer();
