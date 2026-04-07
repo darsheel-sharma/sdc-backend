@@ -12,6 +12,7 @@ This file explains the routes that are currently exposed by `sdc-backend`.
   - `http://localhost:5000`
   - `http://127.0.0.1:5000`
 - The auth router is mounted at `/auth`.
+- The opportunities router is mounted at `/opportunities`.
 
 ## Active routes
 
@@ -178,6 +179,66 @@ Authorization: Bearer <jwt>
 }
 ```
 
+### `GET /opportunities`
+
+Returns opportunity/news items for the home feed.
+
+- Handler: `getOpportunities` in `controllers/opportunity.js`
+- Query params:
+  - `type` (optional): `all`, `hackathon`, `job`, `project`
+- What it does:
+  - fetches recent opportunities sorted by newest first
+  - optionally filters by `type`
+  - populates `postedBy` and `team` user references
+- Success response:
+
+```json
+{
+  "opportunities": [
+    {
+      "_id": "...",
+      "title": "BuildSprint registration open",
+      "desc": "...",
+      "type": "hackathon",
+      "postedBy": {
+        "_id": "...",
+        "name": "Jane Doe",
+        "email": "jane@example.com"
+      },
+      "createdAt": "..."
+    }
+  ]
+}
+```
+
+### `POST /opportunities`
+
+Creates a new opportunity/news item.
+
+- Handler: `createOpportunity` in `controllers/opportunity.js`
+- Middleware: `verifyToken`
+- Required header:
+
+```http
+Authorization: Bearer <jwt>
+```
+
+- Request body:
+
+```json
+{
+  "title": "BuildSprint registration open",
+  "desc": "Looking for frontend and backend teammates",
+  "type": "hackathon",
+  "tags": ["react", "node"]
+}
+```
+
+- Allowed `type` values:
+  - `hackathon`
+  - `job`
+  - `project`
+
 ## Auth middleware
 
 `verifyToken` protects authenticated routes.
@@ -194,14 +255,8 @@ Authorization: Bearer <jwt>
 These are useful to know because other parts of the repo still point at them.
 
 - `/auth/get-user`
-  - The frontend calls this route in `sdc-frontend/app/components/navbar.tsx` and `sdc-frontend/app/components/newsCard.tsx`.
+  - The frontend calls this route in `sdc-frontend/app/components/navbar.tsx`.
   - It is not currently registered in `sdc-backend/routes/auth.js`.
-- Opportunity endpoints
-  - `controllers/opportunity.js` defines `createOpportunity` and `getOpportunities`.
-  - There is no route file or `app.use(...)` mounting them right now.
-- `/library/save-article`
-  - The frontend calls this in `sdc-frontend/app/components/newsCard.tsx`.
-  - There is no matching route in the current `sdc-backend` project.
 
 ## Environment variables the backend expects
 

@@ -11,7 +11,13 @@ const opportunitySchema = new mongoose.Schema(
       trim: true,
       alias: "description",
     },
-    type: { type: String, required: true, trim: true, lowercase: true },
+    type: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      enum: ["hackathon", "job", "project"],
+    },
     tags: {
       type: [{ type: String, trim: true, lowercase: true }],
       default: [],
