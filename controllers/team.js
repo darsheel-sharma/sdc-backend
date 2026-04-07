@@ -5,6 +5,7 @@ export const getTeams = async (req, res) => {
     const { opportunityId } = req.query;
     const filter = {};
 
+    // Let the same endpoint serve all teams or teams for one opportunity.
     if (opportunityId) {
       filter.opportunity = opportunityId;
     }

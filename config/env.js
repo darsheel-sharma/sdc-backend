@@ -7,6 +7,7 @@ const envFile = path.resolve(
   "../.env",
 );
 
+// Load the backend .env explicitly so this still works from other cwd values.
 dotenv.config({ path: envFile, quiet: true });
 
 const requiredVars = [

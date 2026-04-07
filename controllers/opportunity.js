@@ -6,6 +6,7 @@ export const createOpportunity = async (req, res) => {
     const { title, desc, description, type, status, maxMembers, tags, team } =
       req.body;
 
+    // Accept either desc or description from the frontend.
     const descriptionText = desc || description;
     const normalizedTags = Array.isArray(tags) ? tags : tags ? [tags] : [];
     const normalizedStatus =
@@ -32,6 +33,7 @@ export const createOpportunity = async (req, res) => {
         .json({ error: "maxMembers must be a positive integer" });
     }
 
+    // Save the opportunity first so the optional team can point back to it.
     const opportunity = await Opportunity.create({
       title,
       desc: descriptionText,
@@ -45,6 +47,7 @@ export const createOpportunity = async (req, res) => {
     let createdTeam = null;
 
     if (typeof team === "string" && team.trim()) {
+      // Support sending just a team name for quick creation.
       createdTeam = await Team.create({
         name: team.trim(),
         opportunity: opportunity._id,
@@ -54,6 +57,7 @@ export const createOpportunity = async (req, res) => {
       opportunity.team = createdTeam._id;
       await opportunity.save();
     } else if (team && typeof team === "object" && team.name) {
+      // Or accept the fuller team payload when it's already assembled.
       createdTeam = await Team.create({
         name: team.name,
         bio: team.bio,
@@ -88,6 +92,7 @@ export const getOpportunities = async (req, res) => {
     const { tag, status } = req.query;
     const filter = {};
 
+    // Query params come in as strings, so normalize before filtering.
     if (tag) {
       filter.tags = tag.toString().trim().toLowerCase();
     }

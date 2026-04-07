@@ -10,12 +10,14 @@ export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
+    // Keep register strict so we don't create half-filled accounts.
     if (!name || !email || !password) {
       return res
         .status(400)
         .json({ error: "Name, email, and password are required" });
     }
 
+    // 12 rounds is a solid default for bcrypt here.
     const hash = await bcrypt.hash(password, 12);
 
     const user = await User.create({ email, password: hash, name });
@@ -24,6 +26,7 @@ export const register = async (req, res) => {
       expiresIn: "1d",
     });
 
+    // Strip the hash before sending the user back.
     const userObject = user.toObject();
     const { password: _, ...userWithoutPassword } = userObject;
 
@@ -55,6 +58,7 @@ export const login = async (req, res) => {
 
     const user = await User.findOne({ email }).lean();
 
+    // Keep the messages separate so the UI can show a clearer hint.
     if (!user) {
       return res.json({ error: "Invalid Email" });
     }
@@ -90,10 +94,12 @@ export const googleLogin = async (req, res) => {
   const { idToken } = req.body;
 
   try {
+    // Verify the token against this app's client id.
     const ticket = await client.verifyIdToken({
       idToken,
       audience: env.GOOGLE_CLIENT_ID,
     });
+    // Google gives us the profile data inside the verified token payload.
     const payload = ticket.getPayload();
 
     if (!payload || !payload.email) {
@@ -103,6 +109,7 @@ export const googleLogin = async (req, res) => {
     const user = await User.findOneAndUpdate(
       { email: payload.email },
       {
+        // Update Google details on every login, but only insert email once.
         $set: { googleId: payload.sub, name: payload.name },
         $setOnInsert: { email: payload.email },
       },
@@ -124,9 +131,11 @@ export const googleLogin = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { skills, bio, team } = req.body;
+    const { name, skills, bio, team } = req.body;
 
+    // Only apply fields that were actually sent by the client.
     const updateData = {};
+    if (name !== undefined) updateData.name = name;
     if (skills !== undefined) {
       updateData.skills = Array.isArray(skills) ? skills : [skills];
     }
@@ -151,6 +160,7 @@ export const updateUser = async (req, res) => {
 
 export const getCurrentUser = async (req, res) => {
   try {
+    // Return the profile fields the frontend needs after login/refresh.
     const user = await User.findById(req.userId).select(
       "name email skills bio team googleId createdAt updatedAt",
     );
