@@ -19,7 +19,6 @@ app.use(
   }),
 );
 app.use(express.json());
-
 app.use("/auth", authroutes);
 
 const startServer = async () => {
