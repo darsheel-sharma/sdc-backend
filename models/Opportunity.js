@@ -12,6 +12,18 @@ const opportunitySchema = new mongoose.Schema(
       alias: "description",
     },
     type: { type: String, required: true, trim: true, lowercase: true },
+    status: {
+      type: String,
+      enum: ["open", "closed"],
+      default: "open",
+      trim: true,
+      lowercase: true,
+    },
+    maxMembers: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
     tags: {
       type: [{ type: String, trim: true, lowercase: true }],
       default: [],
@@ -22,8 +34,9 @@ const opportunitySchema = new mongoose.Schema(
       required: true,
     },
     team: {
-      type: [{ type: Schema.Types.ObjectId, ref: "User" }],
-      default: [],
+      type: Schema.Types.ObjectId,
+      ref: "Team",
+      default: null,
     },
   },
   {
@@ -35,6 +48,7 @@ const opportunitySchema = new mongoose.Schema(
 
 opportunitySchema.index({ postedBy: 1, createdAt: -1 });
 opportunitySchema.index({ type: 1, createdAt: -1 });
+opportunitySchema.index({ tags: 1 });
 
 const Opportunity =
   mongoose.models.Opportunity ||

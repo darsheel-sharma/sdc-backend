@@ -10,6 +10,12 @@ export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
+    if (!name || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: "Name, email, and password are required" });
+    }
+
     const hash = await bcrypt.hash(password, 12);
 
     const user = await User.create({ email, password: hash, name });
@@ -41,6 +47,12 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ error: "Email and password are required" });
+    }
+
     const user = await User.findOne({ email }).lean();
 
     if (!user) {
@@ -115,7 +127,9 @@ export const updateUser = async (req, res) => {
     const { skills, bio, team } = req.body;
 
     const updateData = {};
-    if (skills !== undefined) updateData.skills = skills;
+    if (skills !== undefined) {
+      updateData.skills = Array.isArray(skills) ? skills : [skills];
+    }
     if (bio !== undefined) updateData.bio = bio;
     if (team !== undefined) updateData.team = team;
 
@@ -131,6 +145,23 @@ export const updateUser = async (req, res) => {
     res.json({ user });
   } catch (err) {
     console.error("Update User Error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select(
+      "name email skills bio team googleId createdAt updatedAt",
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ user });
+  } catch (err) {
+    console.error("Get Current User Error:", err);
     res.status(500).json({ error: "Server error" });
   }
 };

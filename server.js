@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import authroutes from "./routes/auth.js";
+import opportunityRoutes from "./routes/opportunity.js";
+import teamRoutes from "./routes/team.js";
 import { env } from "./config/env.js";
 import connectDB from "./config/mongo.js";
 
@@ -20,6 +22,8 @@ app.use(
 );
 app.use(express.json());
 app.use("/auth", authroutes);
+app.use("/opportunities", opportunityRoutes);
+app.use("/teams", teamRoutes);
 
 const startServer = async () => {
   await connectDB();

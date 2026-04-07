@@ -134,7 +134,51 @@ Logs in or creates a user through Google Sign-In.
 
 - Common failures:
   - invalid Google token -> `400 { "error": "Invalid Google Token" }`
-  - verification/auth issues -> `401 { "error": "Authentication failed" }`
+- verification/auth issues -> `401 { "error": "Authentication failed" }`
+
+### `POST /opportunities`
+
+Creates a new opportunity.
+
+- Handler: `createOpportunity` in `controllers/opportunity.js`
+- Middleware: `verifyToken` in `middleware/auth.js`
+- Required header:
+
+```http
+Authorization: Bearer <jwt>
+```
+
+- Request body:
+
+```json
+{
+  "title": "Build backend APIs",
+  "description": "Need teammates for the event app backend",
+  "type": "hackathon",
+  "status": "open",
+  "maxMembers": 4,
+  "tags": ["node", "mongodb"],
+  "team": {
+    "name": "API Builders",
+    "bio": "Backend-focused team",
+    "members": ["<userId>"]
+  }
+}
+```
+
+- Notes:
+  - `description` can also be sent as `desc`
+  - `status` accepts `open` or `closed`
+  - `maxMembers` is required and must be a positive integer
+  - `team` can be either a string team name or a full object
+
+### `GET /opportunities`
+
+Returns opportunities in reverse chronological order.
+
+- Optional query params:
+  - `tag=node`
+  - `status=open`
 
 ### `PUT /auth/update-user`
 
